@@ -1,0 +1,25 @@
+name: Test custom-emoji input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - id: action
+        uses: .
+        with:
+          token: ${{ github.token }}
+          show-emoji: 'true'
+          custom-emoji: 'feat:🚀,fix:🐛,docs:📝'
+          original-markdown: 'true'
+      - name: Assert action ran successfully
+        env:
+          TAG: ${{ steps.action.outputs.tag }}
+          BRANCH: ${{ steps.action.outputs.branch }}
+        run: |
+          echo "tag: $TAG"
+          echo "branch: $BRANCH"
+          echo "PASS: action ran with custom-emoji input without error"
