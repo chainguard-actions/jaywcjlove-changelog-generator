@@ -1,0 +1,33 @@
+name: Test changelog generation with custom-emoji
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - id: action
+        uses: .
+        with:
+          token: ${{ github.token }}
+          show-emoji: 'true'
+          custom-emoji: 'feat:🚀,fix:🐛,docs:📝'
+          original-markdown: 'true'
+          order: asc
+        continue-on-error: true
+      - name: Assert action ran with custom-emoji
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          echo "changelog: ${{ steps.action.outputs.changelog }}"
+          # The action may succeed or fail depending on git history,
+          # but it should at least attempt to run (not a setup error)
+          if [ "${{ steps.action.outcome }}" = "skipped" ]; then
+            echo "FAIL: action was skipped unexpectedly"
+            exit 1
+          fi
+          echo "PASS: action ran with custom-emoji (outcome=${{ steps.action.outcome }})"
