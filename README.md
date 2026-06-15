@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v2.2.4 | [`v2.2.4`](https://github.com/chainguard-actions/jaywcjlove-changelog-generator/tree/v2.2.4) | [`4db66f6`](https://github.com/jaywcjlove/changelog-generator/commit/4db66f6e35ec355da9dfc5ef4815f534a4caa1b7) |
+| v2.4.0 | [`v2.4.0`](https://github.com/chainguard-actions/jaywcjlove-changelog-generator/tree/v2.4.0) | [`00eecde`](https://github.com/jaywcjlove/changelog-generator/commit/00eecde44f40feee4b5c96fe16e5cfdeab76336a) |
 
 ## Privacy
 
