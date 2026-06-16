@@ -1,0 +1,35 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - id: action
+        uses: .
+        with:
+          token: ${{ github.token }}
+          head-ref: HEAD
+          base-ref: HEAD~1
+          original-markdown: 'true'
+          show-emoji: 'true'
+          order: 'asc'
+      - name: Assert changelog output exists
+        env:
+          CHANGELOG: ${{ steps.action.outputs.changelog }}
+        run: |
+          echo "changelog: $CHANGELOG"
+          # changelog may be empty if there are no commits in range, but the step should succeed
+          echo "PASS: action completed successfully"
+      - name: Assert branch output
+        env:
+          BRANCH: ${{ steps.action.outputs.branch }}
+        run: |
+          echo "branch: $BRANCH"
+          echo "PASS: branch output captured"

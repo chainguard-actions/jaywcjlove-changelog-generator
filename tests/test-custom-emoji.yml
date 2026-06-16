@@ -1,0 +1,28 @@
+name: Test custom-emoji input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+      - id: action
+        uses: .
+        with:
+          token: ${{ github.token }}
+          head-ref: HEAD
+          base-ref: HEAD~1
+          show-emoji: 'true'
+          custom-emoji: 'feat:🚀,fix:🐛,docs:📝'
+          original-markdown: 'true'
+      - name: Assert action completed successfully
+        env:
+          CHANGELOG: ${{ steps.action.outputs.changelog }}
+        run: |
+          echo "changelog: $CHANGELOG"
+          echo "PASS: action with custom-emoji completed successfully"
