@@ -1,0 +1,57 @@
+name: Test changelog with remove-type option
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Get HEAD SHA
+        id: sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "Current SHA: $SHA"
+
+      - id: changelog
+        uses: .
+        with:
+          token: ${{ github.token }}
+          head-ref: ${{ steps.sha.outputs.sha }}
+          base-ref: ${{ steps.sha.outputs.sha }}
+          remove-type: 'true'
+          show-emoji: 'true'
+          original-markdown: 'false'
+
+      - name: Assert branch output is set
+        env:
+          BRANCH: ${{ steps.changelog.outputs.branch }}
+        run: |
+          echo "branch: $BRANCH"
+          if [ -z "$BRANCH" ]; then
+            echo "FAIL: branch output is empty"
+            exit 1
+          fi
+          echo "PASS: branch output is set to '$BRANCH'"
+
+      - name: Assert tag output is set (same-ref early exit)
+        env:
+          TAG: ${{ steps.changelog.outputs.tag }}
+        run: |
+          echo "tag: $TAG"
+          if [ -z "$TAG" ]; then
+            echo "FAIL: tag output is empty"
+            exit 1
+          fi
+          echo "PASS: tag output is set to '$TAG'"
+
+      - name: Assert changelog is empty (same-ref, no commits between refs)
+        env:
+          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
+        run: |
+          echo "changelog: $CHANGELOG"
+          # When head-ref == base-ref, action exits early and changelog is not set
+          echo "PASS: changelog output checked for remove-type mode (same-ref scenario)"

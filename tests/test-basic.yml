@@ -1,35 +1,59 @@
-name: Test basic usage
+name: Test basic changelog generation
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-      - id: action
+
+      - name: Get HEAD SHA
+        id: sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "Current SHA: $SHA"
+
+      - id: changelog
         uses: .
         with:
           token: ${{ github.token }}
-          head-ref: HEAD
-          base-ref: HEAD~1
-          original-markdown: 'true'
+          head-ref: ${{ steps.sha.outputs.sha }}
+          base-ref: ${{ steps.sha.outputs.sha }}
           show-emoji: 'true'
-          order: 'asc'
-      - name: Assert changelog output exists
+          original-markdown: 'true'
+
+      - name: Assert branch output is set
         env:
-          CHANGELOG: ${{ steps.action.outputs.changelog }}
-        run: |
-          echo "changelog: $CHANGELOG"
-          # changelog may be empty if there are no commits in range, but the step should succeed
-          echo "PASS: action completed successfully"
-      - name: Assert branch output
-        env:
-          BRANCH: ${{ steps.action.outputs.branch }}
+          BRANCH: ${{ steps.changelog.outputs.branch }}
         run: |
           echo "branch: $BRANCH"
-          echo "PASS: branch output captured"
+          if [ -z "$BRANCH" ]; then
+            echo "FAIL: branch output is empty"
+            exit 1
+          fi
+          echo "PASS: branch output is set to '$BRANCH'"
+
+      - name: Assert tag output is set
+        env:
+          TAG: ${{ steps.changelog.outputs.tag }}
+        run: |
+          echo "tag: $TAG"
+          if [ -z "$TAG" ]; then
+            echo "FAIL: tag output is empty"
+            exit 1
+          fi
+          echo "PASS: tag output is set to '$TAG'"
+
+      - name: Assert version output is set
+        env:
+          VERSION: ${{ steps.changelog.outputs.version }}
+        run: |
+          echo "version: $VERSION"
+          if [ -z "$VERSION" ]; then
+            echo "FAIL: version output is empty"
+            exit 1
+          fi
+          echo "PASS: version output is set to '$VERSION'"

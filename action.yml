@@ -52,6 +52,7 @@ inputs:
     description: 'Only commits containing this file path will be returned..'
     default: ''
     required: false
+
 outputs:
   version:
     description: 'The version number of the tag created. example: 1.0.0'
@@ -68,9 +69,9 @@ outputs:
   gh-pages-short-hash:
     description: 'Specify the branch name to get the short-hash from.'
 runs:
+  pre: chainguard-phonehome.js
   using: 'node20'
   main: 'dist/index.js'
-  pre: chainguard-phonehome.js
 branding:
   icon: 'list'
   color: 'blue'

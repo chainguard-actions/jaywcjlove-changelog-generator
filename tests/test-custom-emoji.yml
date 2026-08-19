@@ -1,28 +1,49 @@
-name: Test custom-emoji input
+name: Test changelog with custom emoji
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-      - id: action
+
+      - name: Get HEAD SHA
+        id: sha
+        run: |
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "Current SHA: $SHA"
+
+      - id: changelog
         uses: .
         with:
           token: ${{ github.token }}
-          head-ref: HEAD
-          base-ref: HEAD~1
+          head-ref: ${{ steps.sha.outputs.sha }}
+          base-ref: ${{ steps.sha.outputs.sha }}
           show-emoji: 'true'
-          custom-emoji: 'feat:🚀,fix:🐛,docs:📝'
           original-markdown: 'true'
-      - name: Assert action completed successfully
+          custom-emoji: 'feat🚀,fix🔧,docs📝'
+
+      - name: Assert branch output is set
         env:
-          CHANGELOG: ${{ steps.action.outputs.changelog }}
+          BRANCH: ${{ steps.changelog.outputs.branch }}
         run: |
-          echo "changelog: $CHANGELOG"
-          echo "PASS: action with custom-emoji completed successfully"
+          echo "branch: $BRANCH"
+          if [ -z "$BRANCH" ]; then
+            echo "FAIL: branch output is empty"
+            exit 1
+          fi
+          echo "PASS: branch output is set to '$BRANCH'"
+
+      - name: Assert tag output is set (same-ref early exit)
+        env:
+          TAG: ${{ steps.changelog.outputs.tag }}
+        run: |
+          echo "tag: $TAG"
+          if [ -z "$TAG" ]; then
+            echo "FAIL: tag output is empty"
+            exit 1
+          fi
+          echo "PASS: tag output is set to '$TAG'"

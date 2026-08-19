@@ -1,0 +1,73 @@
+name: test path
+on:
+  push:
+    branches:
+      - feature-path
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+
+      - run: npm install
+      - run: npm run build
+
+      - name: Create Tag
+        id: create_tag
+        uses: jaywcjlove/create-tag-action@a9b54d7b5e0cd0670eccefc0afd56688adae1522 # main
+        with:
+          package-path: ./package.json
+
+      - name: Generate Changelog (path test)
+        id: changelog
+        # uses: jaywcjlove/changelog-generator@main
+        uses: ./
+        with:
+          path: ./.github/workflows/changelog.yml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{steps.create_tag.outputs.version}}
+          original-markdown: true
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
+      - name: Print changelog outputs
+        env:
+          TAG: ${{ steps.changelog.outputs.tag }}
+          BRANCH: ${{ steps.changelog.outputs.branch }}
+          COMPAREURL: ${{ steps.changelog.outputs.compareurl }}
+          VERSION: ${{ steps.changelog.outputs.version }}
+          GH_PAGES_HASH: ${{ steps.changelog.outputs.gh-pages-hash }}
+          GH_PAGES_SHORT_HASH: ${{ steps.changelog.outputs.gh-pages-short-hash }}
+        run: |
+          echo "outputs.tag - $TAG"
+          echo "outputs.branch - $BRANCH"
+          echo "outputs.compareurl - $COMPAREURL"
+          echo "outputs.version - $VERSION"
+          echo "outputs.gh-pages-hash - $GH_PAGES_HASH"
+          echo "outputs.gh-pages-hash - $GH_PAGES_HASH"
+          echo "outputs.gh-pages-short-hash - $GH_PAGES_SHORT_HASH"
+
+      - name: Generate Changelog (folder path test)
+        # uses: jaywcjlove/changelog-generator@main
+        uses: ./
+        with:
+          path: ./.github/workflows/
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{steps.create_tag.outputs.version}}
+          original-markdown: true
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'
+
+      - name: Generate Changelog (no "path:" test)
+        # uses: jaywcjlove/changelog-generator@main
+        uses: ./
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          head-ref: ${{steps.create_tag.outputs.version}}
+          original-markdown: true
+          filter: '[R|r]elease[d]\s+[v|V]\d(\.\d+){0,2}'

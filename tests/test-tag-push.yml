@@ -1,0 +1,62 @@
+name: Test tag push scenario
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/tags/v1.2.3
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Create a git tag for testing
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git tag v1.2.3 HEAD 2>/dev/null || true
+
+      - id: action
+        uses: .
+        with:
+          token: ${{ github.token }}
+          original-markdown: 'true'
+          show-emoji: 'true'
+          order: 'asc'
+          base-ref: 'v1.2.3'
+          head-ref: '1.2.3'
+
+      - name: Assert tag output is set
+        env:
+          TAG: ${{ steps.action.outputs.tag }}
+        run: |
+          echo "tag: $TAG"
+          if [ -z "$TAG" ]; then
+            echo "FAIL: tag output is empty"
+            exit 1
+          fi
+          echo "PASS: tag=$TAG"
+
+      - name: Assert version output is set
+        env:
+          VERSION: ${{ steps.action.outputs.version }}
+        run: |
+          echo "version: $VERSION"
+          if [ -z "$VERSION" ]; then
+            echo "FAIL: version output is empty"
+            exit 1
+          fi
+          echo "PASS: version=$VERSION"
+
+      - name: Assert version matches expected
+        env:
+          VERSION: ${{ steps.action.outputs.version }}
+        run: |
+          echo "version: $VERSION"
+          if [ "$VERSION" != "1.2.3" ]; then
+            echo "FAIL: expected version '1.2.3', got '$VERSION'"
+            exit 1
+          fi
+          echo "PASS: version matches 1.2.3"
