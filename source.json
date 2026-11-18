@@ -4,8 +4,13 @@
   "version": "v2.4.0",
   "commit_sha": "00eecde44f40feee4b5c96fe16e5cfdeab76336a",
   "url": "https://github.com/jaywcjlove/changelog-generator",
-  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "policy_sha": "374911c4be584df24e6da57af2d990570ef0f859",
   "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
-  "test_agent_version": "1",
-  "harden_agent_version": "1"
+  "test_agent_version": "2",
+  "harden_agent_version": "2",
+  "dist_artifact": {
+    "gcs_uri": "gs://patch-actions-node-artifacts/dist-artifacts/jaywcjlove/changelog-generator/v2.4.0/sha256-f00da408165e58a43dff38692d25e07ad62bfbad149b21d63f7b28a4d1f2951f.tar.gz",
+    "sha256": "f00da408165e58a43dff38692d25e07ad62bfbad149b21d63f7b28a4d1f2951f",
+    "size_bytes": 332136
+  }
 }
